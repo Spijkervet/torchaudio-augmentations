@@ -1,6 +1,6 @@
 # Audio Augmentations
 
-Audio augmentations library for PyTorch for audio in the time-domain.
+Audio augmentations library for PyTorch for audio in the time-domain, with support for stochastic data augmentations as used often in self-supervised / contrastive learning.
 
 
 ## Usage
