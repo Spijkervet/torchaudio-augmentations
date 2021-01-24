@@ -1,5 +1,5 @@
 import random
-import numpy as np
+import torch
 
 class PolarityInversion:
     def __init__(self, p=0.5):
@@ -7,5 +7,5 @@ class PolarityInversion:
 
     def __call__(self, audio):
         if random.random() < self.p:
-            audio = np.negative(audio)
+            audio = torch.negative(audio)
         return audio

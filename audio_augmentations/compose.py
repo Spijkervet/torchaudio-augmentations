@@ -21,8 +21,6 @@ class Compose:
     def transform(self, x):
         for t in self.transforms:
             x = t(x)
-        x = torch.from_numpy(x)
-        x = x.reshape(1, -1)
         return x
 
 

@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import torch
 
 class Delay:
     def __init__(self, sr, p=0.5):
@@ -18,11 +19,9 @@ class Delay:
 
             # calculate delay
             offset = self.calc_offset(ms)
-            beginning = [0.0] * offset
-            end = audio[:-offset]
-            delayed_signal = np.hstack((beginning, end))
+            beginning = torch.zeros(audio.shape[0], offset)
+            end = audio[:, :-offset]
+            delayed_signal = torch.cat((beginning, end), dim=1)
             delayed_signal = delayed_signal * self.factor
             audio = (audio + delayed_signal) / 2
-            audio = audio.astype(np.float32)
-
         return audio

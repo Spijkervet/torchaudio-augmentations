@@ -21,8 +21,6 @@ class PitchShift:
 
     def __call__(self, audio):
         if random.random() < self.p:
-            audio = torch.from_numpy(audio)
-
             y = self.effect_chain.apply(
                 audio, src_info=self.src_info, target_info=self.target_info
             )
@@ -32,5 +30,4 @@ class PitchShift:
             if torch.isnan(y).any() or torch.isinf(y).any():
                 return audio.clone()
 
-            audio = y.numpy()
         return audio

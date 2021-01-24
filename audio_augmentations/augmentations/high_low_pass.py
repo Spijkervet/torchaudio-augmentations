@@ -1,3 +1,4 @@
+import random
 try:
     import essentia.standard
 except Exception as e:
@@ -25,5 +26,6 @@ class HighLowPass:
             # else:
             #     filt = essentia.standard.BandPass(bandwidth=1000, cutoffFrequency=1500, sampleRate=self.sr)
             audio = filt(audio)
+            
 
         return audio
