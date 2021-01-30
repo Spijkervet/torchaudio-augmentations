@@ -3,7 +3,7 @@ import torch
 
 
 class Reverse:
-    def __init__(self, sr, p=0.5):
+    def __init__(self, p=0.5):
         self.p = p
 
     def __call__(self, audio):

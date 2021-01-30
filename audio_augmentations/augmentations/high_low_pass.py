@@ -1,4 +1,6 @@
 import random
+import torch
+
 try:
     import essentia.standard
 except Exception as e:
@@ -22,10 +24,12 @@ class HighLowPass:
                 lowpass_freq = random.randint(2200, 4000)
                 filt = essentia.standard.LowPass(
                     cutoffFrequency=lowpass_freq, sampleRate=self.sr
-                )
+                )            
             # else:
             #     filt = essentia.standard.BandPass(bandwidth=1000, cutoffFrequency=1500, sampleRate=self.sr)
-            audio = filt(audio)
             
+            audio = audio.numpy().reshape(-1)
+            audio = filt(audio)
+            audio = torch.from_numpy(audio).reshape(1, -1)
 
         return audio

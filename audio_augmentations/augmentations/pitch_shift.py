@@ -9,9 +9,7 @@ class PitchShift:
         self.sr = sr
         self.p = p
         self.n_steps = lambda: random.randint(-700, 700)
-        self.effect_chain = (
-            augment.EffectChain().pitch(self.n_steps).rate(self.sr)
-        )
+        self.effect_chain = augment.EffectChain().pitch(self.n_steps).rate(self.sr)
         self.src_info = {"rate": self.sr}
         self.target_info = {
             "channels": 1,
@@ -29,5 +27,6 @@ class PitchShift:
             # and the effect chain includes eg `pitch`
             if torch.isnan(y).any() or torch.isinf(y).any():
                 return audio.clone()
+            return y
 
         return audio

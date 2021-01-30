@@ -22,7 +22,7 @@ class Reverb:
 
     def __call__(self, audio):
         if random.random() < self.p:
-            y = self.effect_chain.apply(
+            audio = self.effect_chain.apply(
                 audio, src_info=self.src_info, target_info=self.target_info
             )
 

@@ -1,5 +1,6 @@
 import random
 
+
 class RandomResizedCrop:
     def __init__(self, n_samples):
         self.n_samples = n_samples

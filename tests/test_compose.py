@@ -1,13 +1,18 @@
+import torch
 import numpy as np
 from audio_augmentations import Compose, ComposeMany
 from audio_augmentations import RandomResizedCrop
+
+
+def random_waveform(num_samples):
+    return torch.from_numpy(np.arange(num_samples)).reshape(1, -1)
 
 
 def test_compose_many():
     num_augmented_samples = 10
 
     num_samples = 22050 * 5
-    audio = np.arange(num_samples)
+    audio = random_waveform(num_samples)
 
     transform = ComposeMany(
         [
@@ -22,8 +27,7 @@ def test_compose_many():
 
 def test_random_resized_crop():
     num_samples = 22050 * 5
-    audio = np.arange(num_samples)
-
+    audio = random_waveform(num_samples)
     transform = Compose([RandomResizedCrop(num_samples)])
 
     audio = transform(audio)
