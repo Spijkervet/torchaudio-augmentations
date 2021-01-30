@@ -22,6 +22,8 @@ def test_polarity():
     audios = transform(audio)
     assert (audios == torch.neg(audio)).all()
 
+    assert audios.shape[1] == audio.shape[1]
+
 
 def test_filter():
     audio, sr = torchaudio.load("tests/classical.00002.wav")
@@ -30,7 +32,8 @@ def test_filter():
         [HighLowPass(sr=sr, p=1)],
     )
     audios = transform(audio)
-    torchaudio.save("tests/filter.wav", audios[0], sample_rate=sr)
+    torchaudio.save("tests/filter.wav", audios, sample_rate=sr)
+    assert audios.shape[1] == audio.shape[1]
 
 
 def test_delay():
@@ -41,7 +44,8 @@ def test_delay():
     )
 
     audios = transform(audio)
-    torchaudio.save("tests/delay.wav", audios[0], sample_rate=sr)
+    torchaudio.save("tests/delay.wav", audios, sample_rate=sr)
+    assert audios.shape[1] == audio.shape[1]
 
 def test_gain():
     num_samples = sr * 5
@@ -52,7 +56,8 @@ def test_gain():
 
     audios = transform(audio)
 
-    torchaudio.save("tests/gain.wav", audios[0], sample_rate=sr)
+    torchaudio.save("tests/gain.wav", audios, sample_rate=sr)
+    assert audios.shape[1] == audio.shape[1]
 
 
 def test_noise():
@@ -64,7 +69,8 @@ def test_noise():
 
     audios = transform(audio)
 
-    torchaudio.save("tests/noise.wav", audios[0], sample_rate=sr)
+    torchaudio.save("tests/noise.wav", audios, sample_rate=sr)
+    assert audios.shape[1] == audio.shape[1]
 
 
 def test_pitch():
@@ -76,7 +82,8 @@ def test_pitch():
 
     audios = transform(audio)
 
-    torchaudio.save("tests/pitch.wav", audios[0], sample_rate=sr)
+    torchaudio.save("tests/pitch.wav", audios, sample_rate=sr)
+    assert audios.shape[1] == audio.shape[1]
 
 
 def test_reverb():
@@ -88,7 +95,8 @@ def test_reverb():
 
     audios = transform(audio)
 
-    torchaudio.save("tests/reverb.wav", audios[0], sample_rate=sr)
+    torchaudio.save("tests/reverb.wav", audios, sample_rate=sr)
+    assert audios.shape[1] == audio.shape[1]
 
 def test_reverse():
     audio, sr = torchaudio.load("tests/classical.00002.wav")
@@ -98,4 +106,5 @@ def test_reverse():
     )
 
     audios = transform(audio)
-    torchaudio.save("tests/reverse.wav", audios[0], sample_rate=sr)
+    torchaudio.save("tests/reverse.wav", audios, sample_rate=sr)
+    assert audios.shape[1] == audio.shape[1]

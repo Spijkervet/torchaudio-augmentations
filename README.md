@@ -24,14 +24,14 @@ transforms = [
 
 We can return either one or many versions of the same audio example:
 ```
-audio = torchaudio.load("testing/test.wav")
+audio = torchaudio.load("testing/classical.00002.wav")
 transform = Compose(transforms=transforms)
 transformed_audio =  transform(audio)
 >> transformed_audio.shape[0] = 1
 ```
 
 ```
-audio = torchaudio.load("testing/test.wav")
+audio = torchaudio.load("testing/classical.00002.wav")
 transform = ComposeMany(transforms=transforms, num_augmented_samples=4)
 transformed_audio = transform(audio)
 >> transformed_audio.shape[0] = 4
