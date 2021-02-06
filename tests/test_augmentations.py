@@ -16,7 +16,7 @@ def test_polarity():
     num_samples = sr * 5
     audio = random_waveform(num_samples, sr)
     transform = Compose(
-        [PolarityInversion(p=1)],
+        [PolarityInversion()],
     )
 
     audios = transform(audio)
@@ -29,7 +29,7 @@ def test_filter():
     audio, sr = torchaudio.load("tests/classical.00002.wav")
     num_samples = sr * 5
     transform = Compose(
-        [HighLowPass(sr=sr, p=1)],
+        [HighLowPass(sr=sr)],
     )
     audios = transform(audio)
     torchaudio.save("tests/filter.wav", audios, sample_rate=sr)
@@ -37,10 +37,10 @@ def test_filter():
 
 
 def test_delay():
+    audio, sr = torchaudio.load("tests/classical.00002.wav")
     num_samples = sr * 5
-    audio = random_waveform(num_samples, sr)
     transform = Compose(
-        [Delay(sr, p=1)],
+        [Delay(sr)],
     )
 
     audios = transform(audio)
@@ -48,10 +48,10 @@ def test_delay():
     assert audios.shape[1] == audio.shape[1]
 
 def test_gain():
+    audio, sr = torchaudio.load("tests/classical.00002.wav")
     num_samples = sr * 5
-    audio = random_waveform(num_samples, sr)
     transform = Compose(
-        [Gain(p=1)],
+        [Gain()],
     )
 
     audios = transform(audio)
@@ -64,7 +64,7 @@ def test_noise():
     audio, sr = torchaudio.load("tests/classical.00002.wav")
     num_samples = sr * 5
     transform = Compose(
-        [Noise(snr=1, p=1)],
+        [Noise(min_snr=0.5, max_snr=1)],
     )
 
     audios = transform(audio)
@@ -74,10 +74,10 @@ def test_noise():
 
 
 def test_pitch():
+    audio, sr = torchaudio.load("tests/classical.00002.wav")
     num_samples = sr * 5
-    audio = random_waveform(num_samples, sr)
     transform = Compose(
-        [PitchShift(audio_length=num_samples, sr=sr, p=1)],
+        [PitchShift(audio_length=num_samples, sr=sr)],
     )
 
     audios = transform(audio)
@@ -87,10 +87,10 @@ def test_pitch():
 
 
 def test_reverb():
+    audio, sr = torchaudio.load("tests/classical.00002.wav")
     num_samples = sr * 5
-    audio = random_waveform(num_samples, sr)
     transform = Compose(
-        [Reverb(sr, p=1)],
+        [Reverb(sr)],
     )
 
     audios = transform(audio)
@@ -102,7 +102,7 @@ def test_reverse():
     audio, sr = torchaudio.load("tests/classical.00002.wav")
     num_samples = sr * 5
     transform = Compose(
-        [Reverse(p=1)],
+        [Reverse()],
     )
 
     audios = transform(audio)
