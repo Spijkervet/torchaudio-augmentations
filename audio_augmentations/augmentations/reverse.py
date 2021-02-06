@@ -2,11 +2,9 @@ import random
 import torch
 
 
-class Reverse:
-    def __init__(self, p=0.5):
-        self.p = p
+class Reverse(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
 
-    def __call__(self, audio):
-        if random.random() < self.p:
-            audio = torch.flip(audio, dims=[0, 1])
-        return audio
+    def forward(self, audio):
+        return torch.flip(audio, dims=[0, 1])

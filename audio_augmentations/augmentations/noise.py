@@ -3,18 +3,24 @@ import numpy as np
 import torch
 
 
-class Noise:
-    def __init__(self, snr=1, p=0.8):
-        self.snr = snr
-        self.p = p
+class Noise(torch.nn.Module):
+    def __init__(self, min_snr=0.001, max_snr=1.0):
+        """
+        :param min_snr: Minimum signal-to-noise ratio
+        :param max_snr: Maximum signal-to-noise ratio
+        """
+        super().__init__()
+        self.min_snr = min_snr
+        self.max_snr = max_snr
 
-    def __call__(self, audio):
-        if random.random() < self.p:
-            audio = audio.numpy()
-            RMS_s = np.sqrt(np.mean(audio ** 2))
-            RMS_n = np.sqrt(RMS_s ** 2 / (pow(10, self.snr / 20)))
-            noise = np.random.normal(0, RMS_n, audio.shape[1]).astype("float32")
-            audio = audio + noise
-            audio = np.clip(audio, -1, 1)
-            audio = torch.from_numpy(audio)
-        return audio
+    def forward(self, audio):
+        std = torch.std(audio)
+        noise_std = random.uniform(
+            self.min_snr * std, self.max_snr * std
+        )
+
+        noise = np.random.normal(
+            0.0, noise_std, size=audio.shape
+        ).astype(np.float32)
+
+        return audio + noise

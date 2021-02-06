@@ -1,12 +1,11 @@
-import random
 import torch
+import random
 
 
-class PolarityInversion:
-    def __init__(self, p=0.5):
-        self.p = p
-
-    def __call__(self, audio):
-        if random.random() < self.p:
-            audio = torch.neg(audio)
+class PolarityInversion(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        
+    def forward(self, audio):
+        audio = torch.neg(audio)
         return audio
