@@ -4,21 +4,21 @@ import augment
 
 
 class PitchShift:
-    def __init__(self, audio_length, sr, pitch_cents_min=700, pitch_cents_max=700):
-        self.audio_length = audio_length
-        self.sr = sr
+    def __init__(self, n_samples, sample_rate, pitch_cents_min=700, pitch_cents_max=700):
+        self.n_samples = n_samples
+        self.sample_rate = sample_rate
         self.pitch_cents_min = pitch_cents_min
         self.pitch_cents_max = pitch_cents_max
-        self.src_info = {"rate": self.sr}
+        self.src_info = {"rate": self.sample_rate}
         self.target_info = {
             "channels": 1,
-            "length": self.audio_length,
-            "rate": self.sr,
+            "length": self.n_samples,
+            "rate": self.sample_rate,
         }
 
     def __call__(self, audio):
         n_steps = random.randint(self.pitch_cents_min, self.pitch_cents_max)
-        effect_chain = augment.EffectChain().pitch(n_steps).rate(self.sr)
+        effect_chain = augment.EffectChain().pitch(n_steps).rate(self.sample_rate)
 
         y = effect_chain.apply(
             audio, src_info=self.src_info, target_info=self.target_info

@@ -4,16 +4,16 @@ import torch
 
 
 class Delay(torch.nn.Module):
-    def __init__(self, sr, volume_factor=0.5, min_delay=200, max_delay=500, delay_interval=50):
+    def __init__(self, sample_rate, volume_factor=0.5, min_delay=200, max_delay=500, delay_interval=50):
         super().__init__()
-        self.sr = sr
+        self.sample_rate = sample_rate
         self.volume_factor = volume_factor
         self.min_delay = min_delay
         self.max_delay = max_delay
         self.delay_interval = delay_interval
 
     def calc_offset(self, ms):
-        return int(ms * (self.sr / 1000))
+        return int(ms * (self.sample_rate / 1000))
 
     def forward(self, audio):
         ms = random.choice(
