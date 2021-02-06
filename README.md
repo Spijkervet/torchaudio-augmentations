@@ -42,3 +42,9 @@ transformed_audio = transform(audio)
 
 Similar to the `torchvision.datasets` interface, an instance of the `Compose` or `ComposeMany` class can be supplied to a torchaudio dataloaders that accept `transform=`.
 
+
+## Optional
+Install WavAugment for reverberation / pitch shifting:
+```
+pip install git+https://github.com/facebookresearch/WavAugment
+```

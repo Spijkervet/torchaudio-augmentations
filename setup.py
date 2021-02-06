@@ -18,10 +18,10 @@ URL = "https://github.com/spijkervet/audio-augmentations"
 EMAIL = "janne.spijkervet@gmail.com"
 AUTHOR = "Janne Spijkervet"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["numpy", "torch", "torchaudio", "essentia", "augment @ git+https://github.com/facebookresearch/WavAugment#egg=augment"]
+REQUIRED = ["numpy", "torch", "torchaudio", "essentia"]
 
 # What packages are optional?
 EXTRAS = {
