@@ -18,10 +18,10 @@ URL = "https://github.com/spijkervet/audio-augmentations"
 EMAIL = "janne.spijkervet@gmail.com"
 AUTHOR = "Janne Spijkervet"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["numpy", "torch", "torchaudio", "essentia"]
+REQUIRED = ["numpy", "torch", "torchaudio", "essentia", "augment @ git+https://github.com/facebookresearch/WavAugment#egg=augment"]
 
 # What packages are optional?
 EXTRAS = {
@@ -43,7 +43,7 @@ try:
 except FileNotFoundError:
     long_description = DESCRIPTION
 
-# Load the package's __version__.py module as a dictionary.
+# Load the package's __version__.py module as as dictionary.
 about = {}
 if not VERSION:
     project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
