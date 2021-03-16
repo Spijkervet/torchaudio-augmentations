@@ -21,11 +21,11 @@ REQUIRES_PYTHON = ">=3.6.0"
 VERSION = "0.1.3"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["numpy", "torch", "torchaudio", "essentia"]
+REQUIRED = ["numpy", "torch", "torchaudio", "wavaugment"]
 
 # What packages are optional?
 EXTRAS = {
-    # 'fancy feature': ['django'],
+    'fancy feature': ['essentia'],
 }
 
 # The rest you shouldn't have to touch too much :)
