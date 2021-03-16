@@ -12,9 +12,9 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = "audio-augmentations"
-DESCRIPTION = "Audio augmentations library, for audio in the time-domain."
-URL = "https://github.com/spijkervet/audio-augmentations"
+NAME = "torchaudio-augmentations"
+DESCRIPTION = "Audio augmentations library for PyTorch, for audio in the time-domain."
+URL = "https://github.com/spijkervet/torchaudio-augmentations"
 EMAIL = "janne.spijkervet@gmail.com"
 AUTHOR = "Janne Spijkervet"
 REQUIRES_PYTHON = ">=3.6.0"
