@@ -1,7 +1,7 @@
 import torch
 import numpy as np
-from audio_augmentations import Compose, ComposeMany
-from audio_augmentations import RandomResizedCrop
+from torchaudio_augmentations import Compose, ComposeMany
+from torchaudio_augmentations import RandomResizedCrop
 
 
 def random_waveform(num_samples):

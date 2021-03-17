@@ -1,7 +1,7 @@
 import torch
 import torchaudio
 import numpy as np
-from audio_augmentations import *
+from torchaudio_augmentations import *
 
 sr = 22050
 
