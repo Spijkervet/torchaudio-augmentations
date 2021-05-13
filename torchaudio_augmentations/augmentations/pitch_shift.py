@@ -4,7 +4,7 @@ import augment
 
 
 class PitchShift:
-    def __init__(self, n_samples, sample_rate, pitch_cents_min=700, pitch_cents_max=700):
+    def __init__(self, n_samples, sample_rate, pitch_cents_min=-700, pitch_cents_max=700):
         self.n_samples = n_samples
         self.sample_rate = sample_rate
         self.pitch_cents_min = pitch_cents_min
