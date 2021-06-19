@@ -1,5 +1,5 @@
 # Audio Augmentations
-[![DOI](https://zenodo.org/badge/214236225.svg)](https://zenodo.org/badge/latestdoi/214236225)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4748582.svg)](https://zenodo.org/record/4748582#)
 
 Audio augmentations library for PyTorch for audio in the time-domain, with support for stochastic data augmentations as used often in self-supervised / contrastive learning.
 
