@@ -37,6 +37,6 @@ class ComposeMany(Compose):
 
     def __call__(self, x):
         samples = []
-        for n in range(self.num_augmented_samples):
-            samples.append(self.transform(x))
+        for _ in range(self.num_augmented_samples):
+            samples.append(self.transform(x).unsqueeze(dim=0))
         return torch.cat(samples, dim=0)

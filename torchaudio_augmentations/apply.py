@@ -1,6 +1,6 @@
 # BSD 3-Clause License
 
-# Copyright (c) Soumith Chintala 2016, 
+# Copyright (c) Soumith Chintala 2016,
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import torch
+
 
 class RandomApply(torch.nn.Module):
     """Apply randomly a list of transformations with a given probability.
@@ -63,10 +64,10 @@ class RandomApply(torch.nn.Module):
         return img
 
     def __repr__(self):
-        format_string = self.__class__.__name__ + '('
-        format_string += '\n    p={}'.format(self.p)
+        format_string = self.__class__.__name__ + "("
+        format_string += "\n    p={}".format(self.p)
         for t in self.transforms:
-            format_string += '\n'
-            format_string += '    {0}'.format(t)
-        format_string += '\n)'
+            format_string += "\n"
+            format_string += "    {0}".format(t)
+        format_string += "\n)"
         return format_string

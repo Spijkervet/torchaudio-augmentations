@@ -3,7 +3,16 @@ import torch
 
 
 class Reverb(torch.nn.Module):
-    def __init__(self, sample_rate, reverberance_min=0, reverberance_max=100, dumping_factor_min=0, dumping_factor_max=100, room_size_min=0, room_size_max=100):
+    def __init__(
+        self,
+        sample_rate,
+        reverberance_min=0,
+        reverberance_max=100,
+        dumping_factor_min=0,
+        dumping_factor_max=100,
+        room_size_min=0,
+        room_size_max=100,
+    ):
         super().__init__()
         self.sample_rate = sample_rate
         self.reverberance_min = reverberance_min
@@ -20,11 +29,14 @@ class Reverb(torch.nn.Module):
 
     def forward(self, audio):
         reverberance = torch.randint(
-            self.reverberance_min, self.reverberance_max, size=(1,)).item()
+            self.reverberance_min, self.reverberance_max, size=(1,)
+        ).item()
         dumping_factor = torch.randint(
-            self.dumping_factor_min, self.dumping_factor_max, size=(1,)).item()
+            self.dumping_factor_min, self.dumping_factor_max, size=(1,)
+        ).item()
         room_size = torch.randint(
-            self.room_size_min, self.room_size_max, size=(1,)).item()
+            self.room_size_min, self.room_size_max, size=(1,)
+        ).item()
 
         num_channels = audio.shape[0]
         effect_chain = (

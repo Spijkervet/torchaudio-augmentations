@@ -4,7 +4,14 @@ import torch
 
 
 class Delay(torch.nn.Module):
-    def __init__(self, sample_rate, volume_factor=0.5, min_delay=200, max_delay=500, delay_interval=50):
+    def __init__(
+        self,
+        sample_rate,
+        volume_factor=0.5,
+        min_delay=200,
+        max_delay=500,
+        delay_interval=50,
+    ):
         super().__init__()
         self.sample_rate = sample_rate
         self.volume_factor = volume_factor
