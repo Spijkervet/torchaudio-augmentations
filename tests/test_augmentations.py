@@ -1,132 +1,125 @@
+import numpy as np
 import torch
 import torchaudio
-import numpy as np
+import unittest
+
 from torchaudio_augmentations import *
 
-sr = 22050
 
+class TestShapes(unittest.TestCase):
 
-def random_waveform(num_samples, sr):
-    freq = 440
-    sine = np.sin(2 * np.pi * np.arange(num_samples) * freq / sr).astype(np.float32)
-    return torch.from_numpy(sine).reshape(1, -1)
+    def setUp(self):
+        self.sr = 22050
+        self.num_samples = self.sr * 5
 
+    def stereo_waveform(self, num_samples):
 
-def test_readme_example():
-    audio, sr = torchaudio.load("tests/classical.00002.wav")
+        # Dividing x legnth value into three parts:- 1/10, 1/2, 4/10.
+        attack_length = num_samples // 10
+        decay_length = num_samples // 2
+        sustain_length = num_samples - (attack_length + decay_length)
+        sustain_value = 0.1   # Release amplitude between 0 and  1
 
-    num_samples = sr * 5
-    transforms = [
-        RandomResizedCrop(n_samples=num_samples),
-        RandomApply([PolarityInversion()], p=0.8),
-        RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3),
-        RandomApply([Gain()], p=0.2),
-        RandomApply([HighLowPass(sample_rate=sr)], p=0.8),
-        RandomApply([Delay(sample_rate=sr)], p=0.5),
-        RandomApply([PitchShift(
-            n_samples=num_samples,
-            sample_rate=sr
-        )], p=0.4),
-        RandomApply([Reverb(sample_rate=sr)], p=0.3)
-    ]
+        # Setting array size and length.
+        attack = np.linspace(0, 1, num=attack_length)
+        decay = np.linspace(1, sustain_value, num=decay_length)
+        sustain = np.ones(sustain_length) * sustain_value
+        attack_decay_sustain = np.concatenate((attack, decay, sustain))
 
-    transform = Compose(transforms=transforms)
-    transformed_audio = transform(audio)
-    assert transformed_audio.shape[0] == 1
+        freq = 440
+        wavedata = np.sin(2 * np.pi * np.arange(num_samples)
+                          * freq / self.sr)
 
-def test_polarity():
-    num_samples = sr * 5
-    audio = random_waveform(num_samples, sr)
-    transform = Compose(
-        [PolarityInversion()],
-    )
+        wavedata = wavedata * attack_decay_sustain
+        wavedata = np.array([wavedata, wavedata * 0.9]).astype(np.float32)
+        return torch.from_numpy(wavedata).reshape(2, -1)
 
-    audios = transform(audio)
-    assert (audios == torch.neg(audio)).all()
+    def test_polarity(self):
+        audio = self.stereo_waveform(self.num_samples)
+        transform = Compose(
+            [PolarityInversion()],
+        )
 
-    assert audios.shape[1] == audio.shape[1]
+        t_audio = transform(audio)
+        assert (t_audio == torch.neg(audio)).all()
 
+        assert t_audio.shape == audio.shape
 
-def test_filter():
-    audio, sr = torchaudio.load("tests/classical.00002.wav")
-    num_samples = sr * 5
-    transform = Compose(
-        [HighLowPass(sample_rate=sr)],
-    )
-    audios = transform(audio)
-    torchaudio.save("tests/filter.wav", audios, sample_rate=sr)
-    assert audios.shape[1] == audio.shape[1]
+    def test_filter(self):
+        audio = self.stereo_waveform(self.num_samples)
+        transform = Compose(
+            [HighLowPass(sample_rate=self.sr)],
+        )
+        t_audio = transform(audio)
+        # torchaudio.save("tests/filter.wav", t_audio, sample_rate=self.sr)
+        assert t_audio.shape == audio.shape
 
+    def test_delay(self):
+        audio = self.stereo_waveform(self.num_samples)
+        transform = Compose(
+            [Delay(self.sr)],
+        )
 
-def test_delay():
-    audio, sr = torchaudio.load("tests/classical.00002.wav")
-    num_samples = sr * 5
-    transform = Compose(
-        [Delay(sr)],
-    )
+        t_audio = transform(audio)
+        # torchaudio.save("tests/delay.wav", t_audio, sample_rate=self.sr)
+        assert t_audio.shape == audio.shape
 
-    audios = transform(audio)
-    torchaudio.save("tests/delay.wav", audios, sample_rate=sr)
-    assert audios.shape[1] == audio.shape[1]
+    def test_gain(self):
+        audio = self.stereo_waveform(self.num_samples)
+        transform = Compose(
+            [Gain()],
+        )
 
-def test_gain():
-    audio, sr = torchaudio.load("tests/classical.00002.wav")
-    num_samples = sr * 5
-    transform = Compose(
-        [Gain()],
-    )
+        t_audio = transform(audio)
+        # torchaudio.save("tests/gain.wav", t_audio, sample_rate=self.sr)
+        assert t_audio.shape == audio.shape
 
-    audios = transform(audio)
+    def test_noise(self):
+        audio = self.stereo_waveform(self.num_samples)
+        transform = Compose(
+            [Noise(min_snr=0.5, max_snr=1)],
+        )
 
-    torchaudio.save("tests/gain.wav", audios, sample_rate=sr)
-    assert audios.shape[1] == audio.shape[1]
+        t_audio = transform(audio)
+        # torchaudio.save("tests/noise.wav", t_audio, sample_rate=self.sr)
+        assert t_audio.shape == audio.shape
 
+    def test_pitch(self):
+        audio = self.stereo_waveform(self.num_samples)
+        transform = Compose(
+            [PitchShift(n_samples=self.num_samples, sample_rate=self.sr)],
+        )
 
-def test_noise():
-    audio, sr = torchaudio.load("tests/classical.00002.wav")
-    num_samples = sr * 5
-    transform = Compose(
-        [Noise(min_snr=0.5, max_snr=1)],
-    )
+        t_audio = transform(audio)
+        # torchaudio.save("tests/pitch.wav", t_audio, sample_rate=sr)
+        assert t_audio.shape == audio.shape
 
-    audios = transform(audio)
+    def test_reverb(self):
+        audio = self.stereo_waveform(self.num_samples)
+        transform = Compose(
+            [Reverb(self.sr)],
+        )
 
-    torchaudio.save("tests/noise.wav", audios, sample_rate=sr)
-    assert audios.shape[1] == audio.shape[1]
+        t_audio = transform(audio)
+        # torchaudio.save("tests/reverb.wav", t_audio, sample_rate=sr)
+        assert t_audio.shape == audio.shape
 
+    def test_reverse(self):
+        stereo_audio = self.stereo_waveform(self.num_samples)
+        transform = Compose(
+            [Reverse()],
+        )
 
-def test_pitch():
-    audio, sr = torchaudio.load("tests/classical.00002.wav")
-    num_samples = sr * 5
-    transform = Compose(
-        [PitchShift(n_samples=num_samples, sample_rate=sr)],
-    )
+        t_audio = transform(stereo_audio)
+        # torchaudio.save("tests/reverse.wav", t_audio, sample_rate=self.sr)
 
-    audios = transform(audio)
+        reversed_single_channel = torch.flip(t_audio, [1])[0]
+        assert torch.equal(reversed_single_channel, stereo_audio[0]) == True
 
-    torchaudio.save("tests/pitch.wav", audios, sample_rate=sr)
-    assert audios.shape[1] == audio.shape[1]
+        reversed_stereo_channel = torch.flip(t_audio, [0])[0]
+        assert torch.equal(reversed_stereo_channel, stereo_audio[0]) == False
 
+        assert t_audio.shape == stereo_audio.shape
 
-def test_reverb():
-    audio, sr = torchaudio.load("tests/classical.00002.wav")
-    num_samples = sr * 5
-    transform = Compose(
-        [Reverb(sr)],
-    )
-
-    audios = transform(audio)
-
-    torchaudio.save("tests/reverb.wav", audios, sample_rate=sr)
-    assert audios.shape[1] == audio.shape[1]
-
-def test_reverse():
-    audio, sr = torchaudio.load("tests/classical.00002.wav")
-    num_samples = sr * 5
-    transform = Compose(
-        [Reverse()],
-    )
-
-    audios = transform(audio)
-    torchaudio.save("tests/reverse.wav", audios, sample_rate=sr)
-    assert audios.shape[1] == audio.shape[1]
+        mono_audio = stereo_audio.mean(dim=0)
+        assert mono_audio.shape[0] == stereo_audio.shape[1]
