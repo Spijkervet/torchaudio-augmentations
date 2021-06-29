@@ -18,7 +18,7 @@ URL = "https://github.com/spijkervet/torchaudio-augmentations"
 EMAIL = "janne.spijkervet@gmail.com"
 AUTHOR = "Janne Spijkervet"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.1.6"
+VERSION = "0.2.0"
 
 # What packages are required for this module to be executed?
 REQUIRED = ["numpy", "torch", "torchaudio", "julius", "wavaugment"]
