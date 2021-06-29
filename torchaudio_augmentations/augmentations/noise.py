@@ -15,12 +15,8 @@ class Noise(torch.nn.Module):
 
     def forward(self, audio):
         std = torch.std(audio)
-        noise_std = random.uniform(
-            self.min_snr * std, self.max_snr * std
-        )
+        noise_std = random.uniform(self.min_snr * std, self.max_snr * std)
 
-        noise = np.random.normal(
-            0.0, noise_std, size=audio.shape
-        ).astype(np.float32)
+        noise = np.random.normal(0.0, noise_std, size=audio.shape).astype(np.float32)
 
         return audio + noise

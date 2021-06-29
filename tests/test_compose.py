@@ -1,34 +1,32 @@
-import torch
-import numpy as np
-from torchaudio_augmentations import Compose, ComposeMany
-from torchaudio_augmentations import RandomResizedCrop
+import pytest
+from torchaudio_augmentations import Compose, ComposeMany, RandomResizedCrop
+
+from .utils import generate_waveform
+
+sample_rate = 22050
+num_samples = sample_rate * 5
 
 
-def random_waveform(num_samples):
-    return torch.from_numpy(np.arange(num_samples)).reshape(1, -1)
+@pytest.mark.parametrize("num_channels", [1, 2])
+def test_compose(num_channels):
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
+    transform = Compose([RandomResizedCrop(num_samples),])
+
+    t_audio = transform(audio)
+    assert t_audio.shape[0] == num_channels
+    assert t_audio.shape[1] == num_samples
 
 
-def test_compose_many():
+@pytest.mark.parametrize("num_channels", [1, 2])
+def test_compose_many(num_channels):
     num_augmented_samples = 10
 
-    num_samples = 22050 * 5
-    audio = random_waveform(num_samples)
-
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
     transform = ComposeMany(
-        [
-            RandomResizedCrop(num_samples),
-        ],
-        num_augmented_samples=num_augmented_samples,
+        [RandomResizedCrop(num_samples),], num_augmented_samples=num_augmented_samples,
     )
 
-    audios = transform(audio)
-    assert audios.shape[0] == num_augmented_samples
-
-
-def test_random_resized_crop():
-    num_samples = 22050 * 5
-    audio = random_waveform(num_samples)
-    transform = Compose([RandomResizedCrop(num_samples)])
-
-    audio = transform(audio)
-    assert audio.shape[1] == num_samples
+    t_audio = transform(audio)
+    assert t_audio.shape[0] == num_augmented_samples
+    assert t_audio.shape[1] == num_channels
+    assert t_audio.shape[2] == num_samples
