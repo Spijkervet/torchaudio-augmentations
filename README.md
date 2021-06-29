@@ -1,12 +1,14 @@
 # Audio Augmentations
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4748582.svg)](https://zenodo.org/record/4748582#)
 
-Audio augmentations library for PyTorch for audio in the time-domain, with support for stochastic data augmentations as used often in self-supervised / contrastive learning.
+Audio augmentations library for PyTorch for audio in the time-domain, with support for stochastic data augmentations as used often in self-supervised / contrastive learning. One can apply a single stochastic augmentation or create as many stochastically augmented examples from a single interface.
+
+This package follows the conventions set out by `torchaudio`, with audio defined as a vector of `[channel, time]`. Each individual augmentation can be initialized on its own, or be wrapped around a `RandomApply` interface which will apply the augmentation with probability `p`.
 
 
 ## Usage
-We can define several audio augmentations, which will be applied sequentially to a raw audio waveform:
-```
+We can define a single or several audio augmentations, which are applied sequentially to an audio waveform.
+```python
 from audio_augmentations import *
 
 audio, sr = torchaudio.load("tests/classical.00002.wav")
@@ -17,7 +19,7 @@ transforms = [
     RandomApply([PolarityInversion()], p=0.8),
     RandomApply([Noise(min_snr=0.3, max_snr=0.5)], p=0.3),
     RandomApply([Gain()], p=0.2),
-    RandomApply([HighLowPass(sample_rate=sr)], p=0.8),
+    HighLowPass(sample_rate=sr), # this augmentation will always be applied in this aumgentation chain!
     RandomApply([Delay(sample_rate=sr)], p=0.5),
     RandomApply([PitchShift(
         n_samples=num_samples,
@@ -27,21 +29,31 @@ transforms = [
 ]
 ```
 
-We can return either one or many versions of the same audio example:
+We can also define a stochastic augmentation on multiple transformations. The following will apply both polarity inversion and white noise with a probability of 80%, a gain of 20%, and delay and reverb with a probability of 50%:
+```python
+transforms = [
+    RandomResizedCrop(n_samples=num_samples),
+    RandomApply([PolarityInversion(), Noise(min_snr=0.3, max_snr=0.5)], p=0.8),
+    RandomApply([Gain()], p=0.2),
+    RandomApply([Delay(sample_rate=sr), Reverb(sample_rate=sr)], p=0.5)
+]
 ```
+
+We can return either one or many versions of the same audio example:
+```python
 transform = Compose(transforms=transforms)
 transformed_audio =  transform(audio)
->> transformed_audio.shape[0] = 1
+>> transformed_audio.shape = [num_channels, num_samples]
 ```
 
 ```
 audio = torchaudio.load("testing/classical.00002.wav")
 transform = ComposeMany(transforms=transforms, num_augmented_samples=4)
 transformed_audio = transform(audio)
->> transformed_audio.shape[0] = 4
+>> transformed_audio.shape = [4, num_channels, num_samples]
 ```
 
-Similar to the `torchvision.datasets` interface, an instance of the `Compose` or `ComposeMany` class can be supplied to a torchaudio dataloaders that accept `transform=`.
+Similar to the `torchvision.datasets` interface, an instance of the `Compose` or `ComposeMany` class can be supplied to `torchaudio` dataloaders that accept `transform=`.
 
 
 ## Optional
