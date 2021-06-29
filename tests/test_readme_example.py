@@ -1,7 +1,7 @@
 import torch
 import torchaudio
 import numpy as np
-from torchaudio_augmentations import *
+from torchaudio_augmentations import Compose, RandomResizedCrop, RandomApply, PolarityInversion, Noise, Gain, HighLowPass, Delay, PitchShift, Reverb
 
 sr = 22050
 
