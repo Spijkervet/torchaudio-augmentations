@@ -35,7 +35,8 @@ def test_random_resized_crop(num_channels):
 
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_polarity(num_channels):
-    audio = generate_waveform(sample_rate, num_samples, num_channels=num_channels)
+    audio = generate_waveform(sample_rate, num_samples,
+                              num_channels=num_channels)
     transform = Compose([PolarityInversion()],)
 
     t_audio = transform(audio)
@@ -45,11 +46,10 @@ def test_polarity(num_channels):
 
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_filter(num_channels):
-    audio, sr = torchaudio.load("/Users/janne/Desktop/givin_up.mp3")
-    # audio = generate_waveform(sample_rate, num_samples, num_channels)
-    transform = Compose([HighLowPass(sample_rate=sr)],)
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
+    transform = Compose([HighLowPass(sample_rate=sample_rate)],)
     t_audio = transform(audio)
-    torchaudio.save("tests/filter.wav", t_audio, sample_rate=sr)
+    # torchaudio.save("tests/filter.wav", t_audio, sample_rate=sample_rate)
     assert t_audio.shape == audio.shape
 
 
@@ -86,7 +86,8 @@ def test_noise(num_channels):
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_pitch(num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
-    transform = Compose([PitchShift(n_samples=num_samples, sample_rate=sample_rate)],)
+    transform = Compose(
+        [PitchShift(n_samples=num_samples, sample_rate=sample_rate)],)
 
     t_audio = transform(audio)
     # torchaudio.save("tests/pitch.wav", t_audio, sample_rate=sample_rate)
