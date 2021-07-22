@@ -32,9 +32,9 @@ class PitchShift:
 
         if y.shape[1] != audio.shape[1]:
             if y.shape[1] > audio.shape[1]:
-                y = y[:, audio.shape[1]]
+                y = y[:, : audio.shape[1]]
             else:
-                y0 = torch.zeros(1, audio.shape[1])
+                y0 = torch.zeros(1, audio.shape[1]).to(y.device)
                 y0[:, : y.shape[1]] = y
                 y = y0
         return y
