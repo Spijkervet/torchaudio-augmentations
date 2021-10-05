@@ -28,7 +28,7 @@ class Delay(torch.nn.Module):
         )
 
         offset = self.calc_offset(ms)
-        beginning = torch.zeros(audio.shape[0], offset)
+        beginning = torch.zeros(audio.shape[0], offset, device=audio.device)
         end = audio[:, :-offset]
         delayed_signal = torch.cat((beginning, end), dim=1)
         delayed_signal = delayed_signal * self.volume_factor
