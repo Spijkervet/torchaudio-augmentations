@@ -22,7 +22,7 @@ VERSION = "0.2.3"
 
 # What packages are required for this module to be executed?
 REQUIRED = ["numpy", "torch", "torchaudio", "julius", "wavaugment", "torch-pitch-shift"]
-TEST_REQUIRED = ["pytest", "black", "librosa"]
+TEST_REQUIRED = ["pytest", "pytest-cov", "black", "librosa"]
 
 # What packages are optional?
 EXTRAS = {
