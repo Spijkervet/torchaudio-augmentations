@@ -7,4 +7,4 @@ class Reverse(torch.nn.Module):
         super().__init__()
 
     def forward(self, audio):
-        return torch.flip(audio, dims=[1])
+        return torch.flip(audio, dims=[-1])

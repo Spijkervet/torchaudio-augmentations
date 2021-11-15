@@ -1,40 +1,63 @@
 import random
 import torch
-import augment
+from torchaudio_augmentations.utils import (
+    add_audio_batch_dimension,
+    remove_audio_batch_dimension,
+    tensor_has_valid_audio_batch_dimension,
+)
+from fractions import Fraction
+from typing import Optional
+from torch_pitch_shift import get_fast_shifts, pitch_shift, semitones_to_ratio
 
 
 class PitchShift:
     def __init__(
-        self, n_samples, sample_rate, pitch_cents_min=-700, pitch_cents_max=700
+        self,
+        n_samples,
+        sample_rate,
+        pitch_shift_min: int = -7.0,
+        pitch_shift_max: int = 7.0,
+        bins_per_octave: Optional[int] = 12,
     ):
         self.n_samples = n_samples
         self.sample_rate = sample_rate
-        self.pitch_cents_min = pitch_cents_min
-        self.pitch_cents_max = pitch_cents_max
-        self.src_info = {"rate": self.sample_rate}
+        self.pitch_shift_min = pitch_shift_min
+        self.pitch_shift_max = pitch_shift_max
+        self.bins_per_octave = bins_per_octave
 
-    def __call__(self, audio):
-        n_steps = random.randint(self.pitch_cents_min, self.pitch_cents_max)
-        effect_chain = augment.EffectChain().pitch(n_steps).rate(self.sample_rate)
+        self._fast_shifts = get_fast_shifts(
+            sample_rate,
+            lambda x: x >= semitones_to_ratio(self.pitch_shift_min)
+            and x <= semitones_to_ratio(self.pitch_shift_max)
+            and x != 1,
+        )
 
-        num_channels = audio.shape[0]
-        target_info = {
-            "channels": num_channels,
-            "length": self.n_samples,
-            "rate": self.sample_rate,
-        }
-        y = effect_chain.apply(audio, src_info=self.src_info, target_info=target_info)
+        if len(self._fast_shifts) == 0:
+            raise ValueError(
+                f"Could not compute any fast pitch-shift ratios for the given sample rate and pitch shift range: {self.pitch_shift_min} - {self.pitch_shift_max} (semitones)"
+            )
 
-        # sox might misbehave sometimes by giving nan/inf if sequences are too short (or silent)
-        # and the effect chain includes eg `pitch`
-        if torch.isnan(y).any() or torch.isinf(y).any():
-            return audio.clone()
+    @property
+    def fast_shifts(self):
+        return self._fast_shifts
 
-        if y.shape[1] != audio.shape[1]:
-            if y.shape[1] > audio.shape[1]:
-                y = y[:, : audio.shape[1]]
-            else:
-                y0 = torch.zeros(1, audio.shape[1]).to(y.device)
-                y0[:, : y.shape[1]] = y
-                y = y0
+    def draw_sample_uniform_from_fast_shifts(self) -> Fraction:
+        return random.choice(self.fast_shifts)
+
+    def __call__(self, audio: torch.Tensor) -> torch.Tensor:
+        is_batched = False
+        if not tensor_has_valid_audio_batch_dimension(audio):
+            audio = add_audio_batch_dimension(audio)
+            is_batched = True
+
+        fast_shift = self.draw_sample_uniform_from_fast_shifts()
+        y = pitch_shift(
+            input=audio,
+            shift=fast_shift,
+            sample_rate=self.sample_rate,
+            bins_per_octave=self.bins_per_octave,
+        )
+
+        if is_batched:
+            y = remove_audio_batch_dimension(y)
         return y
