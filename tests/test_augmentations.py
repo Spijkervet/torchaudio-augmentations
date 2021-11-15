@@ -196,7 +196,7 @@ def test_pitch_shift_transform_with_pitch_detection():
     f0_hz = f0_hz[~np.isnan(f0_hz)]
 
     detected_f0_hz = np.max(f0_hz)
-    
+
     detection_threshold_in_hz = 40
     # the detected frequency vs. expected frequency should not be smaller than 40Hz.
     assert abs(detected_f0_hz - expected_frequency_shift) < detection_threshold_in_hz
