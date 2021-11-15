@@ -18,14 +18,16 @@ URL = "https://github.com/spijkervet/torchaudio-augmentations"
 EMAIL = "janne.spijkervet@gmail.com"
 AUTHOR = "Janne Spijkervet"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["numpy", "torch", "torchaudio", "julius", "wavaugment"]
+REQUIRED = ["numpy", "torch", "torchaudio", "julius", "wavaugment", "torch-pitch-shift"]
+TEST_REQUIRED = ["pytest"]
 
 # What packages are optional?
 EXTRAS = {
-    'fancy feature': [''],
+    "fancy feature": [""],
+    "test": TEST_REQUIRED,
 }
 
 # The rest you shouldn't have to touch too much :)

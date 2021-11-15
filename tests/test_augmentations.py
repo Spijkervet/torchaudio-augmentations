@@ -33,11 +33,37 @@ def test_random_resized_crop(num_channels):
     assert audio.shape[1] == num_samples
 
 
+@pytest.mark.parametrize(
+    ["batch_size", "num_channels"],
+    [
+        (1, 1),
+        (4, 1),
+        (16, 1),
+        (1, 2),
+        (4, 2),
+        (16, 2),
+    ],
+)
+def test_random_resized_crop_batched(batch_size, num_channels):
+
+    num_samples = 22050 * 5
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
+    audio = audio.repeat(batch_size, 1, 1)
+
+    transform = Compose([RandomResizedCrop(num_samples)])
+
+    audio = transform(audio)
+    assert audio.shape[0] == batch_size
+    assert audio.shape[1] == num_channels
+    assert audio.shape[2] == num_samples
+
+
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_polarity(num_channels):
-    audio = generate_waveform(sample_rate, num_samples,
-                              num_channels=num_channels)
-    transform = Compose([PolarityInversion()],)
+    audio = generate_waveform(sample_rate, num_samples, num_channels=num_channels)
+    transform = Compose(
+        [PolarityInversion()],
+    )
 
     t_audio = transform(audio)
     assert (t_audio == torch.neg(audio)).all()
@@ -47,7 +73,9 @@ def test_polarity(num_channels):
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_filter(num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
-    transform = Compose([HighLowPass(sample_rate=sample_rate)],)
+    transform = Compose(
+        [HighLowPass(sample_rate=sample_rate)],
+    )
     t_audio = transform(audio)
     # torchaudio.save("tests/filter.wav", t_audio, sample_rate=sample_rate)
     assert t_audio.shape == audio.shape
@@ -56,7 +84,9 @@ def test_filter(num_channels):
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_delay(num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
-    transform = Compose([Delay(sample_rate=sample_rate)],)
+    transform = Compose(
+        [Delay(sample_rate=sample_rate)],
+    )
 
     t_audio = transform(audio)
     # torchaudio.save("tests/delay.wav", t_audio, sample_rate=sample_rate)
@@ -66,7 +96,9 @@ def test_delay(num_channels):
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_gain(num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
-    transform = Compose([Gain()],)
+    transform = Compose(
+        [Gain()],
+    )
 
     t_audio = transform(audio)
     # torchaudio.save("tests/gain.wav", t_audio, sample_rate=sample_rate)
@@ -76,7 +108,9 @@ def test_gain(num_channels):
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_noise(num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
-    transform = Compose([Noise(min_snr=0.5, max_snr=1)],)
+    transform = Compose(
+        [Noise(min_snr=0.5, max_snr=1)],
+    )
 
     t_audio = transform(audio)
     # torchaudio.save("tests/noise.wav", t_audio, sample_rate=sample_rate)
@@ -87,17 +121,41 @@ def test_noise(num_channels):
 def test_pitch(num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
     transform = Compose(
-        [PitchShift(n_samples=num_samples, sample_rate=sample_rate)],)
+        [PitchShift(n_samples=num_samples, sample_rate=sample_rate)],
+    )
 
     t_audio = transform(audio)
-    # torchaudio.save("tests/pitch.wav", t_audio, sample_rate=sample_rate)
+    # torchaudio.save("tests/pitch.wav", audio, sample_rate=sample_rate)
+    # torchaudio.save("tests/t_pitch.wav", t_audio, sample_rate=sample_rate)
     assert t_audio.shape == audio.shape
+
+
+def test_pitch_shift_fast_ratios():
+    ps = PitchShift(
+        n_samples=num_samples,
+        sample_rate=sample_rate,
+        pitch_shift_min=-5,
+        pitch_shift_max=5,
+    )
+    assert len(ps.fast_shifts) == 20
+
+
+def test_pitch_shift_no_fast_ratios():
+    with pytest.raises(ValueError):
+        ps = PitchShift(
+            n_samples=num_samples,
+            sample_rate=sample_rate,
+            pitch_shift_min=4,
+            pitch_shift_max=4,
+        )
 
 
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_reverb(num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
-    transform = Compose([Reverb(sample_rate=sample_rate)],)
+    transform = Compose(
+        [Reverb(sample_rate=sample_rate)],
+    )
 
     t_audio = transform(audio)
     # torchaudio.save("tests/reverb.wav", t_audio, sample_rate=sample_rate)
@@ -107,7 +165,9 @@ def test_reverb(num_channels):
 @pytest.mark.parametrize("num_channels", [1, 2])
 def test_reverse(num_channels):
     stereo_audio = generate_waveform(sample_rate, num_samples, num_channels)
-    transform = Compose([Reverse()],)
+    transform = Compose(
+        [Reverse()],
+    )
 
     t_audio = transform(stereo_audio)
     # torchaudio.save("tests/reverse.wav", t_audio, sample_rate=sample_rate)
