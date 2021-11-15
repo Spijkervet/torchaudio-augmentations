@@ -1,16 +1,16 @@
 import random
 import torch
+from fractions import Fraction
+from typing import Optional
+from torch_pitch_shift import get_fast_shifts, pitch_shift, semitones_to_ratio
 from torchaudio_augmentations.utils import (
     add_audio_batch_dimension,
     remove_audio_batch_dimension,
     tensor_has_valid_audio_batch_dimension,
 )
-from fractions import Fraction
-from typing import Optional
-from torch_pitch_shift import get_fast_shifts, pitch_shift, semitones_to_ratio
 
 
-class PitchShift:
+class PitchShift(torch.nn.Module):
     def __init__(
         self,
         n_samples,
