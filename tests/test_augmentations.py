@@ -66,8 +66,13 @@ def test_polarity(num_channels):
     )
 
     t_audio = transform(audio)
-    assert (t_audio == torch.neg(audio)).all()
+    assert torch.eq(t_audio, torch.neg(audio)).all()
     assert t_audio.shape == audio.shape
+
+    audio = torch.Tensor([5, 6, -1, 3])
+    expected_audio = torch.Tensor([-5, -6, 1, -3])
+    t_audio = transform(audio)
+    assert torch.eq(expected_audio, t_audio).all()
 
 
 @pytest.mark.parametrize("num_channels", [1, 2])
