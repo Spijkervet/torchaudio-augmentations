@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 
 from torchaudio_augmentations import (
+    RandomApply,
     Compose,
     RandomResizedCrop,
     PolarityInversion,
@@ -20,6 +21,51 @@ from .utils import generate_waveform
 
 sample_rate = 22050
 num_samples = sample_rate * 5
+
+
+@pytest.mark.parametrize("seed", range(10))
+@pytest.mark.parametrize("p", (0, 1))
+@pytest.mark.parametrize("num_channels", (1, 2))
+def test_random_apply(p, seed, num_channels):
+    torch.manual_seed(seed)
+    transform = RandomApply([PolarityInversion()], p=p)
+
+    num_channels = 3
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
+
+    t_audio = transform(audio)
+    if p == 0:
+        assert torch.eq(t_audio, audio).all() == True
+    elif p == 1:
+        assert torch.eq(t_audio, audio).all() == False
+
+    # Checking if RandomApply can be printed as string
+    transform.__repr__()
+
+
+@pytest.mark.parametrize("num_channels", (1, 2))
+def test_compose(num_channels):
+    torch.manual_seed(42)
+
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
+    transforms = Compose([PolarityInversion(), Gain(min_gain=-20, max_gain=-19)])
+    s_transforms = torch.nn.Sequential(*transforms.transforms)
+
+    t_audio = transforms(audio)
+    t_audio_sequential_pass = s_transforms(audio)
+
+    assert torch.eq(t_audio, t_audio_sequential_pass).all()
+
+    t = Compose(
+        [
+            lambda x: x,
+        ]
+    )
+    with pytest.raises(RuntimeError, match="cannot call a value of type 'Tensor'"):
+        torch.jit.script(t)
+
+    # check if we can print Compose() as string
+    t.__repr__()
 
 
 @pytest.mark.parametrize("num_channels", [1, 2])
@@ -137,9 +183,15 @@ def test_noise(num_channels):
     assert t_audio.shape == audio.shape
 
 
+@pytest.mark.parametrize("batch_size", [1, 2, 16])
 @pytest.mark.parametrize("num_channels", [1, 2])
-def test_pitch(num_channels):
+def test_pitch(batch_size, num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
+
+    if batch_size > 1:
+        audio = audio.unsqueeze(dim=0)
+        audio = audio.repeat(batch_size, 1, 1)
+
     transform = Compose(
         [PitchShift(n_samples=num_samples, sample_rate=sample_rate)],
     )
