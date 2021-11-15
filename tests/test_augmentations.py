@@ -1,7 +1,9 @@
 import librosa
 import torch
 import pytest
+import random
 import numpy as np
+from unittest import mock
 
 from torchaudio_augmentations import (
     RandomApply,
@@ -15,6 +17,8 @@ from torchaudio_augmentations import (
     PitchShift,
     Reverb,
     Reverse,
+    LowPassFilter,
+    HighPassFilter,
 )
 from .utils import generate_waveform
 
@@ -45,13 +49,13 @@ def test_random_apply(p, seed, num_channels):
 
 @pytest.mark.parametrize("num_channels", (1, 2))
 def test_compose(num_channels):
-    torch.manual_seed(42)
 
     audio = generate_waveform(sample_rate, num_samples, num_channels)
     transforms = Compose([PolarityInversion(), Gain(min_gain=-20, max_gain=-19)])
     s_transforms = torch.nn.Sequential(*transforms.transforms)
-
+    random.seed(42)
     t_audio = transforms(audio)
+    random.seed(42)
     t_audio_sequential_pass = s_transforms(audio)
 
     assert torch.eq(t_audio, t_audio_sequential_pass).all()
@@ -274,7 +278,6 @@ def test_reverse(num_channels):
     )
 
     t_audio = transform(stereo_audio)
-    # torchaudio.save("tests/reverse.wav", t_audio, sample_rate=sample_rate)
 
     reversed_single_channel = torch.flip(t_audio, [1])[0]
     assert torch.equal(reversed_single_channel, stereo_audio[0]) == True
@@ -286,3 +289,56 @@ def test_reverse(num_channels):
 
     mono_audio = stereo_audio.mean(dim=0)
     assert mono_audio.shape[0] == stereo_audio.shape[1]
+
+
+@pytest.mark.parametrize("batch_size", [1, 2, 16])
+@pytest.mark.parametrize("num_channels", [1, 2])
+def test_lowpass_filter(batch_size, num_channels):
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
+
+    if batch_size > 1:
+        audio = audio.unsqueeze(dim=0)
+        audio = audio.repeat(batch_size, 1, 1)
+
+    transform = LowPassFilter(sample_rate, freq_low=200, freq_high=2000)
+
+    t_audio = transform(audio)
+    assert t_audio.shape == audio.shape
+
+
+@pytest.mark.parametrize("batch_size", [1, 2, 16])
+@pytest.mark.parametrize("num_channels", [1, 2])
+def test_highpass_filter(batch_size, num_channels):
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
+
+    if batch_size > 1:
+        audio = audio.unsqueeze(dim=0)
+        audio = audio.repeat(batch_size, 1, 1)
+
+    transform = HighPassFilter(sample_rate, freq_low=200, freq_high=2000)
+
+    t_audio = transform(audio)
+    assert t_audio.shape == audio.shape
+
+
+@mock.patch("random.randint")
+@pytest.mark.parametrize("batch_size", [1, 2, 16])
+@pytest.mark.parametrize("num_channels", [1, 2])
+def test_high_low_pass_filter(randint_function, batch_size, num_channels):
+    audio = generate_waveform(sample_rate, num_samples, num_channels)
+
+    if batch_size > 1:
+        audio = audio.unsqueeze(dim=0)
+        audio = audio.repeat(batch_size, 1, 1)
+
+    transform = HighLowPass(sample_rate)
+
+    # let's test for the high pass filter
+    randint_function.return_value = 0
+    t_audio = transform(audio)
+    assert t_audio.shape == audio.shape
+
+    # let's test for the low pass filter
+    randint_function.return_value = 1
+    t_audio = transform(audio)
+    assert t_audio.shape == audio.shape
