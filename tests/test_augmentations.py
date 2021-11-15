@@ -1,7 +1,7 @@
-import numpy as np
+import librosa
 import torch
-import torchaudio
 import pytest
+import numpy as np
 
 from torchaudio_augmentations import (
     Compose,
@@ -162,12 +162,43 @@ def test_pitch_shift_fast_ratios():
 
 def test_pitch_shift_no_fast_ratios():
     with pytest.raises(ValueError):
-        ps = PitchShift(
+        _ = PitchShift(
             n_samples=num_samples,
             sample_rate=sample_rate,
             pitch_shift_min=4,
             pitch_shift_max=4,
         )
+
+
+def test_pitch_shift_transform_with_pitch_detection():
+    """To check semi-tone values, check: http://www.homepages.ucl.ac.uk/~sslyjjt/speech/semitone.html"""
+
+    source_frequency = 440
+    max_semitone_shift = 4
+    expected_frequency_shift = 554
+
+    num_channels = 1
+    audio = generate_waveform(
+        sample_rate, num_samples, num_channels, frequency=source_frequency
+    )
+    pitch_shift = PitchShift(
+        n_samples=num_samples,
+        sample_rate=sample_rate,
+        pitch_shift_min=max_semitone_shift,
+        pitch_shift_max=max_semitone_shift + 1,
+    )
+
+    t_audio = pitch_shift(audio)
+    librosa_audio = t_audio[0].numpy()
+    f0_hz, _, _ = librosa.pyin(librosa_audio, fmin=10, fmax=1000)
+
+    # remove nan values:
+    f0_hz = f0_hz[~np.isnan(f0_hz)]
+
+    detected_f0_hz = np.max(f0_hz)
+
+    # the detected frequency vs. expected frequency should not be smaller than 20Hz.
+    assert abs(detected_f0_hz - expected_frequency_shift) < 20
 
 
 @pytest.mark.parametrize("num_channels", [1, 2])

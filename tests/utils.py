@@ -3,7 +3,10 @@ import torch
 
 
 def generate_waveform(
-    sample_rate: int, num_samples: int, num_channels: int
+    sample_rate: int,
+    num_samples: int,
+    num_channels: int,
+    frequency: int = 440,
 ) -> torch.Tensor:
 
     # Dividing x legnth value into three parts:- 1/10, 1/2, 4/10.
@@ -18,8 +21,7 @@ def generate_waveform(
     sustain = np.ones(sustain_length) * sustain_value
     attack_decay_sustain = np.concatenate((attack, decay, sustain))
 
-    freq = 440
-    wavedata = np.sin(2 * np.pi * np.arange(num_samples) * freq / sample_rate)
+    wavedata = np.sin(2 * np.pi * np.arange(num_samples) * frequency / sample_rate)
 
     wavedata = wavedata * attack_decay_sustain
 
