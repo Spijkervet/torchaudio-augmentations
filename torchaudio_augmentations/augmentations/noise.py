@@ -4,7 +4,7 @@ import torch
 
 
 class Noise(torch.nn.Module):
-    def __init__(self, min_snr=-4, max_snr=-2):
+    def __init__(self, min_snr=-80, max_snr=-40):
         """
         :param min_snr: Minimum signal-to-noise ratio in dB.
         :param max_snr: Maximum signal-to-noise ratio in dB.

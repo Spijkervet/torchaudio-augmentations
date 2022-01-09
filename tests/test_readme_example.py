@@ -29,7 +29,7 @@ def test_readme_example():
     transforms = [
         RandomResizedCrop(n_samples=num_samples),
         RandomApply([PolarityInversion()], p=0.8),
-        RandomApply([Noise(min_snr=-0.5, max_snr=-0.7)], p=0.3),
+        RandomApply([Noise(min_snr=-10, max_snr=-6)], p=0.3),
         RandomApply([Gain()], p=0.2),
         RandomApply([HighLowPass(sample_rate=sr)], p=0.8),
         RandomApply([Delay(sample_rate=sr)], p=0.5),

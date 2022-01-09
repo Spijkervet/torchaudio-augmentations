@@ -27,7 +27,7 @@ num_samples = sr * 5
 transforms = [
     RandomResizedCrop(n_samples=num_samples),
     RandomApply([PolarityInversion()], p=0.8),
-    RandomApply([Noise(min_snr=-3, max_snr=-2.3)], p=0.3),
+    RandomApply([Noise(min_snr=-60, max_snr=-46)], p=0.3),
     RandomApply([Gain()], p=0.2),
     HighLowPass(sample_rate=sr), # this augmentation will always be applied in this aumgentation chain!
     RandomApply([Delay(sample_rate=sr)], p=0.5),
@@ -43,7 +43,7 @@ We can also define a stochastic augmentation on multiple transformations. The fo
 ```python
 transforms = [
     RandomResizedCrop(n_samples=num_samples),
-    RandomApply([PolarityInversion(), Noise(min_snr=-3, max_snr=-2.3)], p=0.8),
+    RandomApply([PolarityInversion(), Noise(min_snr=-60, max_snr=-46)], p=0.8),
     RandomApply([Gain()], p=0.2),
     RandomApply([Delay(sample_rate=sr), Reverb(sample_rate=sr)], p=0.5)
 ]
