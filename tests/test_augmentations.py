@@ -206,26 +206,6 @@ def test_pitch(batch_size, num_channels):
     assert t_audio.shape == audio.shape
 
 
-def test_pitch_shift_fast_ratios():
-    ps = PitchShift(
-        n_samples=num_samples,
-        sample_rate=sample_rate,
-        pitch_shift_min=-5,
-        pitch_shift_max=5,
-    )
-    assert len(ps.fast_shifts) == 20
-
-
-def test_pitch_shift_no_fast_ratios():
-    with pytest.raises(ValueError):
-        _ = PitchShift(
-            n_samples=num_samples,
-            sample_rate=sample_rate,
-            pitch_shift_min=4,
-            pitch_shift_max=4,
-        )
-
-
 def test_pitch_shift_transform_with_pitch_detection():
     """To check semi-tone values, check: http://www.homepages.ucl.ac.uk/~sslyjjt/speech/semitone.html"""
 

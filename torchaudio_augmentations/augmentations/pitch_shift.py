@@ -1,63 +1,47 @@
 import random
 import torch
-from fractions import Fraction
-from typing import Optional
-from torch_pitch_shift import get_fast_shifts, pitch_shift, semitones_to_ratio
-from torchaudio_augmentations.utils import (
-    add_audio_batch_dimension,
-    remove_audio_batch_dimension,
-    tensor_has_valid_audio_batch_dimension,
-)
+import augment
 
 
-class PitchShift(torch.nn.Module):
+class PitchShift:
     def __init__(
-        self,
-        n_samples,
-        sample_rate,
-        pitch_shift_min: int = -7.0,
-        pitch_shift_max: int = 7.0,
-        bins_per_octave: Optional[int] = 12,
+        self, n_samples, sample_rate, pitch_shift_min=-7.0, pitch_shift_max=7.0
     ):
         self.n_samples = n_samples
         self.sample_rate = sample_rate
-        self.pitch_shift_min = pitch_shift_min
-        self.pitch_shift_max = pitch_shift_max
-        self.bins_per_octave = bins_per_octave
+        self.pitch_shift_cents_min = int(pitch_shift_min * 100)
+        self.pitch_shift_cents_max = int(pitch_shift_max * 100)
+        self.src_info = {"rate": self.sample_rate}
 
-        self._fast_shifts = get_fast_shifts(
-            sample_rate,
-            lambda x: x >= semitones_to_ratio(self.pitch_shift_min)
-            and x <= semitones_to_ratio(self.pitch_shift_max)
-            and x != 1,
-        )
+    def process(self, x):
+        n_steps = random.randint(self.pitch_shift_cents_min, self.pitch_shift_cents_max)
+        effect_chain = augment.EffectChain().pitch(n_steps).rate(self.sample_rate)
+        num_channels = x.shape[0]
+        target_info = {
+            "channels": num_channels,
+            "length": self.n_samples,
+            "rate": self.sample_rate,
+        }
+        y = effect_chain.apply(x, src_info=self.src_info, target_info=target_info)
 
-        if len(self._fast_shifts) == 0:
-            raise ValueError(
-                f"Could not compute any fast pitch-shift ratios for the given sample rate and pitch shift range: {self.pitch_shift_min} - {self.pitch_shift_max} (semitones)"
-            )
+        # sox might misbehave sometimes by giving nan/inf if sequences are too short (or silent)
+        # and the effect chain includes eg `pitch`
+        if torch.isnan(y).any() or torch.isinf(y).any():
+            return x.clone()
 
-    @property
-    def fast_shifts(self):
-        return self._fast_shifts
-
-    def draw_sample_uniform_from_fast_shifts(self) -> Fraction:
-        return random.choice(self.fast_shifts)
-
-    def __call__(self, audio: torch.Tensor) -> torch.Tensor:
-        is_batched = False
-        if not tensor_has_valid_audio_batch_dimension(audio):
-            audio = add_audio_batch_dimension(audio)
-            is_batched = True
-
-        fast_shift = self.draw_sample_uniform_from_fast_shifts()
-        y = pitch_shift(
-            input=audio,
-            shift=fast_shift,
-            sample_rate=self.sample_rate,
-            bins_per_octave=self.bins_per_octave,
-        )
-
-        if is_batched:
-            y = remove_audio_batch_dimension(y)
+        if y.shape[1] != x.shape[1]:
+            if y.shape[1] > x.shape[1]:
+                y = y[:, : x.shape[1]]
+            else:
+                y0 = torch.zeros(num_channels, x.shape[1]).to(y.device)
+                y0[:, : y.shape[1]] = y
+                y = y0
         return y
+
+    def __call__(self, audio):
+        if audio.ndim == 3:
+            for b in range(audio.shape[0]):
+                audio[b] = self.process(audio[b])
+            return audio
+        else:
+            return self.process(audio)
