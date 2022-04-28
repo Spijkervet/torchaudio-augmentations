@@ -179,7 +179,7 @@ def test_gain(num_channels):
 def test_noise(num_channels):
     audio = generate_waveform(sample_rate, num_samples, num_channels)
     transform = Compose(
-        [Noise(min_snr=0.5, max_snr=1)],
+        [Noise(min_snr=-6, max_snr=0)],
     )
 
     t_audio = transform(audio)
